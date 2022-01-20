@@ -2,6 +2,7 @@
 
 import datetime
 import subprocess as sp
+import os
 
 
 ATTRIBUTE_CHAR = "-"
@@ -181,7 +182,7 @@ def day_distance(d1, d2):
 	return get_distance(d1, d2) // (24 * 60)
 
 
-def get_events():
+def get_events_parse():
 	weekly_path = "/Users/ginoprasad/Scripts/schedule_manager/schedules/weekly_schedule.txt"
 	events_path = "/Users/ginoprasad/Scripts/schedule_manager/schedules/events.txt"
 	events = parse(weekly_path)
@@ -191,6 +192,29 @@ def get_events():
 			event['time_slot'] = (((get_current_datetime()[0] + event['time_slot'][0][1] - get_current_datetime_full()[0][1]),), event['time_slot'][1])
 			events.append(event)
 	return events
+
+
+
+def update_cache(events, cache_path):
+	with open(cache_path, 'w') as outfile:
+		outfile.write("events = [\n")
+		for event in events:
+			outfile.write(f"\t{event},\n")
+		outfile.write("]\n")
+
+
+
+def get_events(cache_path="/Users/ginoprasad/Scripts/schedule_manager/cache/events_cache.py"):
+	script_modified_time = os.path.getmtime(cache_path) // 60
+	current_time = os.times().elapsed // 60
+
+	if (current_time - script_modified_time) // (24 * 60):
+		events = get_events_parse()
+		update_cache(events, cache_path)
+	else:
+		from cache.events_cache import events
+		return events
+
 
 
 def update_url_file(event, outfile_path):
