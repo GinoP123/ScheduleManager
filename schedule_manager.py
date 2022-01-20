@@ -157,6 +157,7 @@ def get_abs_days(date, year_month_days):
 			days_ += year_month_days[month - 1]
 	return days_
 
+
 def first(d1, d2):
 	for c1, c2 in zip(d1[0] + d1[1], d2[0] + d2[1]):
 		if c1 > c2:
@@ -177,7 +178,6 @@ def get_distance(d1, d2):
 	return ((((date_2_days - date_1_days) * 24) + d2[1][0] - d1[1][0]) * 60) + d2[1][1] - d1[1][1]
 
 
-
 def day_distance(d1, d2):
 	return get_distance(d1, d2) // (24 * 60)
 
@@ -194,7 +194,6 @@ def get_events_parse():
 	return events
 
 
-
 def update_cache(events, cache_path):
 	with open(cache_path, 'w') as outfile:
 		outfile.write("events = [\n")
@@ -203,18 +202,22 @@ def update_cache(events, cache_path):
 		outfile.write("]\n")
 
 
-
 def get_events(cache_path="/Users/ginoprasad/Scripts/schedule_manager/cache/events_cache.py"):
-	script_modified_time = os.path.getmtime(cache_path) // 60
-	current_time = os.times().elapsed // 60
+	script_mtime = (os.path.getmtime(cache_path) // 60)
+	current_time = (os.times().elapsed // 60)
 
-	if (current_time - script_modified_time) // (24 * 60):
+	weekly_path = "/Users/ginoprasad/Scripts/schedule_manager/schedules/weekly_schedule.txt"
+	events_path = "/Users/ginoprasad/Scripts/schedule_manager/schedules/events.txt"
+
+	weekly_mtime = (os.path.getmtime(weekly_path) // 60)
+	events_mtime = (os.path.getmtime(events_path) // 60)
+
+	if (current_time - script_mtime) // (24 * 60) or (script_mtime - weekly_mtime >= 0) or (script_mtime - events_mtime >= 0):
 		events = get_events_parse()
 		update_cache(events, cache_path)
 	else:
-		from cache.events_cache import events
-		return events
-
+		from cache.events_cache import events	
+	return events
 
 
 def update_url_file(event, outfile_path):
