@@ -250,6 +250,6 @@ def main():
 		if closest["links"]:
 			update_url_file(closest, outfile)
 			sp.run("/Users/ginoprasad/Scripts/change_chrome_profile.sh 1".split(), capture_output=True)
-			sp.run(["sublime", outfile])
+			sp.run(["/Users/ginoprasad/Scripts/open_folder.sh", outfile])
 	elif distance <= 30:
 		sp.run(f"say '{closest['name']} in {distance} minute{'s' if distance != 1 else ''}'".split(' '))
