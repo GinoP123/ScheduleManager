@@ -30,7 +30,7 @@ def is_attribute(line):
 
 def get_attribute_data(line):
 	assert line.startswith(ATTRIBUTE_CHAR)
-	return line.strip().lstrip(ATTRIBUTE_CHAR).split()
+	return tuple(line.strip().lstrip(ATTRIBUTE_CHAR).split())
 
 
 def is_time_slot(line_data, weekly):
@@ -124,10 +124,13 @@ def parse(path, weekly=True):
 				if curr and 'time_slot' in curr:
 					curr["index"][1] = i
 					events.append(curr)
-				curr = {"name": line, "descriptions": [], "links": [], "index": [i, None], "weekly": weekly}
+				curr = {"name": line, "descriptions": [], "links": [], "index": [i, None], "weekly": weekly, "open_auto": False}
 			elif "name" in curr:
 				line_data = get_attribute_data(line)
-				if is_time_slot(line_data, weekly=weekly):
+
+				if ' '.join(line_data).lower() == 'open automatically':
+					curr["open_auto"] = True
+				elif is_time_slot(line_data, weekly=weekly):
 					time_slot = get_time_slot(line_data, weekly=weekly)
 					if time_slot in time_slots:
 						raise TypeError("ERROR: Multiple Events In Same Timeslot")
@@ -189,7 +192,7 @@ def get_events_parse():
 	events = parse(WEEKLY_PATH)
 	for event in parse(EVENTS_PATH, weekly=False):
 		day_dist = day_distance(get_current_datetime_full(), event['time_slot'])
-		if day_dist < len(DAYS):
+		if day_dist < len(DAYS) or event['time_slot'][0] == get_current_datetime_full()[0]:
 			event['time_slot'] = (((get_current_datetime()[0] + event['time_slot'][0][1] - get_current_datetime_full()[0][1]),), event['time_slot'][1])
 			events.append(event)
 	return events
@@ -247,21 +250,21 @@ def delete_event(event):
 
 def print_meetings():
 	events = get_events()
-	current_day = get_current_datetime()[0]
-
+	current_datetime = get_current_datetime()
 	meetings = []
-
+	
 	for event in events:
-		if current_day in event['time_slot'][0]:
+		if current_datetime[0] in event['time_slot'][0] and \
+			time_distance(current_datetime, event['time_slot']) < (24 * 60):
 			meetings.append(event)
 
 	print()
 	if meetings:
-		print("\tEvents Today:")
-		sp.run("say Events Today".split())
+		print("\tRemaining Events:")
+		sp.run("say Remaining Events".split())
 	else:
-		print("\tNo Events Today")
-		sp.run("say No Events Today".split())
+		print("\tNo Events Remaining")
+		sp.run("say No Events Remaining".split())
 
 	for event in sorted(meetings, key=lambda ev: ev['time_slot'][1]):
 		name = event['name']
@@ -285,12 +288,15 @@ def main():
 	distance = time_distance(current_datetime, closest['time_slot'])
 
 	open(outfile, 'w').close()
+
 	if distance < 5:
 		update_url_file(closest, outfile)
 		sp.run("/Users/ginoprasad/Scripts/change_chrome_profile.sh 1".split(), capture_output=True)
 		sp.run(["/Users/ginoprasad/Scripts/open_folder.sh", outfile])
+		if closest["open_auto"]:
+			import schedule_open_url
 		if not closest['weekly']:
 			delete_event(closest)
-			print(f"Deleted {closest['name']}")
 	elif distance <= 10:
 		sp.run(f"say '{closest['name']} in {distance} minute{'s' if distance != 1 else ''}'".split(' '))
+
