@@ -4,7 +4,6 @@ import datetime
 import subprocess as sp
 import os
 
-
 ATTRIBUTE_CHAR = "-"
 DAYS={"U": "Sunday", "M": "Monday", "T": "Tuesday", "W": "Wednesday", "R": "Thursday", "F": "Friday", "S": "Saturday"}
 DAY_TO_INT={"Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6}
@@ -13,6 +12,7 @@ TIME_SUFFIXES={"AM": 0, "PM": 12}
 YEAR=int(datetime.datetime.now().strftime("%Y"))
 WEEKLY_PATH = "/Users/ginoprasad/Scripts/schedule_manager/schedules/weekly_schedule.txt"
 EVENTS_PATH = "/Users/ginoprasad/Scripts/schedule_manager/schedules/events.txt"
+
 
 def get_month_days(year):
 	month_num_days_=[(31 if not (month_num + (month_num // 7)) % 2 else 30) for month_num, month in enumerate(MONTHS)]
@@ -200,12 +200,9 @@ def day_distance(d1, d2):
 
 
 def get_day(datetime):
-	curr_datetime = get_current_datetime_full()
-
-	if first(curr_datetime, datetime):
-		day_dist = get_abs_days(datetime, MONTH_NUM_DAYS_THIS) - get_abs_days(curr_datetime, MONTH_NUM_DAYS_THIS)
-	else:
-		day_dist = sum(MONTH_NUM_DAYS_THIS) - get_abs_days(datetime, MONTH_NUM_DAYS_THIS) + get_abs_days(curr_datetime, MONTH_NUM_DAYS_NEXT)
+	curr_date = (get_current_datetime_full()[0], (0, 0))
+	date = (datetime[0], (0, 0))
+	day_dist = day_distance(curr_date, date)
 	return (day_dist + get_current_datetime()[0]) % 7
 
 
