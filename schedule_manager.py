@@ -33,25 +33,8 @@ def get_attribute_data(line):
 	return tuple(line.strip().lstrip(ATTRIBUTE_CHAR).split())
 
 
-def is_time_slot(line_data, weekly):
-	if len(line_data) != 2 or line_data[1][-2:] not in TIME_SUFFIXES:
-		return False
-	if weekly:
-		return is_weekly_day(line_data[0])
-
-	date = line_data[0].split('/')
-	if len(date) != 2:
-		return False
-	month, day = map(lambda x: int(x.strip()), date)
-	if first(get_current_datetime_full(), ((month, day), abs_time(line_data[1]))):
-		month_days = MONTH_NUM_DAYS_THIS[month - 1]
-	else:
-		month_days = MONTH_NUM_DAYS_NEXT[month - 1]
-	return 0 < day <= month_days
-
-
 def is_weekly_day(days_):
-	return all([(ch in DAYS) for ch in days_])
+	return all([(ch in DAYS) for ch in days_]) and days_
 
 
 def abs_time(string):
@@ -63,9 +46,35 @@ def abs_time(string):
 	else:
 		hour = int(string[:-2])
 		minute = 0
-	hour %= 12
+
+	if hour == 12:
+		hour = 0
+
 	hour += TIME_SUFFIXES[suffix]
-	return (hour, minute) 
+	return (hour, minute)
+
+
+def is_time_slot(line_data, weekly):
+	if len(line_data) != 2 or line_data[1][-2:] not in TIME_SUFFIXES:
+		return False
+
+	hour, minute = abs_time(line_data[1])
+	if not (0 <= hour < 24 and 0 <= minute < 60):
+		return False
+
+	if weekly:
+		return is_weekly_day(line_data[0])
+
+	date = line_data[0].split('/')
+	if len(date) != 2:
+		return False
+	month, day = map(lambda x: int(x.strip()), date)
+	if first(get_current_datetime_full(), ((month, day), (hour, minute))):
+		month_days = MONTH_NUM_DAYS_THIS[month - 1]
+	else:
+		month_days = MONTH_NUM_DAYS_NEXT[month - 1]
+
+	return 0 < day <= month_days
 
 
 def get_time_slot(line_data, weekly=True):
@@ -124,12 +133,14 @@ def parse(path, weekly=True):
 				if curr and 'time_slot' in curr:
 					curr["index"][1] = i
 					events.append(curr)
-				curr = {"name": line, "descriptions": [], "links": [], "index": [i, None], "weekly": weekly, "open_auto": False}
+				curr = {"name": line, "descriptions": [], "links": [], "index": [i, None], "weekly": weekly, "open_auto": False, "silence": False}
 			elif "name" in curr:
 				line_data = get_attribute_data(line)
 
 				if ' '.join(line_data).lower() == 'open automatically':
 					curr["open_auto"] = True
+				elif ' '.join(line_data).lower() == "silence notifications":
+					curr["silence"] = True
 				elif is_time_slot(line_data, weekly=weekly):
 					time_slot = get_time_slot(line_data, weekly=weekly)
 					if time_slot in time_slots:
@@ -160,7 +171,7 @@ def get_abs_days(date, year_month_days):
 		if month_num == month - 1:
 			days_ += days
 		else:
-			days_ += year_month_days[month - 1]
+			days_ += year_month_days[month_num]
 	return days_
 
 
@@ -188,12 +199,22 @@ def day_distance(d1, d2):
 	return get_distance(d1, d2) // (24 * 60)
 
 
+def get_day(datetime):
+	curr_datetime = get_current_datetime_full()
+
+	if first(curr_datetime, datetime):
+		day_dist = get_abs_days(datetime, MONTH_NUM_DAYS_THIS) - get_abs_days(curr_datetime, MONTH_NUM_DAYS_THIS)
+	else:
+		day_dist = sum(MONTH_NUM_DAYS_THIS) - get_abs_days(datetime, MONTH_NUM_DAYS_THIS) + get_abs_days(curr_datetime, MONTH_NUM_DAYS_NEXT)
+	return (day_dist + get_current_datetime()[0]) % 7
+
+
 def get_events_parse():
 	events = parse(WEEKLY_PATH)
 	for event in parse(EVENTS_PATH, weekly=False):
 		day_dist = day_distance(get_current_datetime_full(), event['time_slot'])
 		if day_dist < len(DAYS) or event['time_slot'][0] == get_current_datetime_full()[0]:
-			event['time_slot'] = (((get_current_datetime()[0] + event['time_slot'][0][1] - get_current_datetime_full()[0][1]),), event['time_slot'][1])
+			event['time_slot'] = ((get_day(event['time_slot']),), event['time_slot'][1])
 			events.append(event)
 	return events
 
@@ -248,9 +269,70 @@ def delete_event(event):
 		outfile.write(''.join(lines))
 
 
-def print_meetings():
+def convert_to_event_format(name, time_slot, link, description):
+	time_slot = ' '.join(time_slot)
+	information = (info for info in (name, time_slot, link, description) if info)
+	return '\n\t- '.join(information) + '\n\n'
+
+
+def get_new_event_data():
+	name_question = "\tName: "
+	weekly_question = "\tWeekly Event (y or n): "
+	days_question = "\tDays: "
+	date_question = "\tDate: "
+	time_question = "\tTime: "
+	link_question = "\tLink: "
+	description_question = "\tDescription: "
+
+	print()
+	name = input(name_question).strip()
+	while not name:
+		name = input(name_question).strip()
+
+	weekly = input(weekly_question).lower()
+	while weekly not in ('y', 'n'):
+		weekly = input(weekly_question).lower()
+	weekly = True if weekly == 'y' else False
+
+	date = time_slot = days = ""
+	while not is_time_slot(time_slot, weekly=weekly):
+		if weekly:
+			days = input(days_question).upper()
+			while not is_weekly_day(days):
+				days = input(days_question).upper()
+		else:
+			date = input(date_question)
+		
+		time = input(time_question)
+		time_slot = (f"{days}{date}", time)
+
+	link = input(link_question).strip()
+	while link and not is_link((link,)):
+		link = input(link_question).strip()
+
+	description = input(description_question).strip()
+	print()
+
+	return convert_to_event_format(name, time_slot, link, description), weekly
+
+
+def create_event():
+	event, weekly = get_new_event_data()
+	path = (EVENTS_PATH, WEEKLY_PATH)[int(weekly)]
+
+	with open(path, 'a') as outfile:
+		outfile.write(event)
+	print("\tEvent Successfully Created!\n")
+
+
+def print_meetings(current_datetime=None):
+	suffix = "Remaining"
+	if current_datetime is None:
+		current_datetime = get_current_datetime()
+	else:
+		suffix = "Tomorrow"
+
 	events = get_events()
-	current_datetime = get_current_datetime()
 	meetings = []
 	
 	for event in events:
@@ -259,12 +341,15 @@ def print_meetings():
 			meetings.append(event)
 
 	print()
+
+	announcements = []
+
 	if meetings:
-		print("\tRemaining Events:")
-		sp.run("say Remaining Events".split())
+		print(f"\tEvents {suffix}:")
+		announcements.append(f"say Events {suffix}")
 	else:
-		print("\tNo Events Remaining")
-		sp.run("say No Events Remaining".split())
+		print(f"\tNo Events {suffix}")
+		announcements.append(f"say No Events {suffix}")
 
 	for event in sorted(meetings, key=lambda ev: ev['time_slot'][1]):
 		name = event['name']
@@ -272,8 +357,16 @@ def print_meetings():
 		time = get_time_name(*event['time_slot'][1])
 		time_string = "\t\t{}:{} {}".format(*time)
 		print('\t'.join((time_string, name)))
-		sp.run(f"say {name} at {int(time[0])} {minutes if minutes else ''} {time[2]}".split())
+		announcements.append(f"say {name} at {int(time[0])} {minutes if minutes else ''} {time[2]}")
 	print()
+
+	# for announcement in announcements:
+	# 	sp.run(announcement.split())
+
+
+def print_tomorrows_meetings():
+	current_datetime = ((get_current_datetime()[0] + 1) % 7, (0, 0))
+	print_meetings(current_datetime)
 
 
 def main():
@@ -287,16 +380,17 @@ def main():
 	closest = min(events, key=lambda x: time_distance(current_datetime, x['time_slot']))
 	distance = time_distance(current_datetime, closest['time_slot'])
 
-	open(outfile, 'w').close()
+	# open(outfile, 'w').close()
 
 	if distance < 5:
 		update_url_file(closest, outfile)
 		sp.run("/Users/ginoprasad/Scripts/change_chrome_profile.sh 1".split(), capture_output=True)
-		sp.run(["/Users/ginoprasad/Scripts/open_folder.sh", outfile])
+		sp.run(["/Users/ginoprasad/Scripts/open_file.sh", outfile])
 		if closest["open_auto"]:
 			import schedule_open_url
 		if not closest['weekly']:
 			delete_event(closest)
-	elif distance <= 10:
+	elif (distance == 30 or distance < 15) and not closest["silence"]:
 		sp.run(f"say '{closest['name']} in {distance} minute{'s' if distance != 1 else ''}'".split(' '))
 
+main()
