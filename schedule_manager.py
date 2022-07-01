@@ -10,8 +10,8 @@ DAY_TO_INT={"Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 
 MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 TIME_SUFFIXES={"AM": 0, "PM": 12}
 YEAR=int(datetime.datetime.now().strftime("%Y"))
-WEEKLY_PATH = "/Users/ginoprasad/Scripts/schedule_manager/schedules/weekly_schedule.txt"
-EVENTS_PATH = "/Users/ginoprasad/Scripts/schedule_manager/schedules/events.txt"
+WEEKLY_PATH = "/Users/ginoprasad/Scripts/ScheduleManager/schedules/weekly_schedule.txt"
+EVENTS_PATH = "/Users/ginoprasad/Scripts/ScheduleManager/schedules/events.txt"
 
 
 def get_month_days(year):
@@ -224,7 +224,7 @@ def update_cache(events, cache_path):
 		outfile.write("]\n")
 
 
-def get_events(cache_path="/Users/ginoprasad/Scripts/schedule_manager/cache/events_cache.py"):
+def get_events(cache_path="/Users/ginoprasad/Scripts/ScheduleManager/cache/events_cache.py"):
 	script_mtime = (os.path.getmtime(cache_path) // 60)
 	current_time = (os.times().elapsed // 60)
 
@@ -367,7 +367,7 @@ def print_tomorrows_meetings():
 
 
 def main():
-	outfile = "/Users/ginoprasad/Scripts/schedule_manager/schedule_open_url.py"
+	outfile = "/Users/ginoprasad/Scripts/ScheduleManager/schedule_open_url.py"
 	events = get_events()
 	current_datetime = get_current_datetime()
 
