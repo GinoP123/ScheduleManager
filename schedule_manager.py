@@ -393,4 +393,3 @@ def main():
 	elif (distance == 30 or distance < 15) and not closest["silence"]:
 		sp.run(f"say '{closest['name']} in {distance} minute{'s' if distance != 1 else ''}'".split(' '))
 
-main()
