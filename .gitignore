@@ -1,6 +1,7 @@
 schedules/*
 __pycache__/*
 cache/*
-.DS_Store
 schedule_open_url.py
+external_scripts.py
 test.py
+.DS_Store
