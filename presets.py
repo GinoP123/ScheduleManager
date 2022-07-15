@@ -1,6 +1,6 @@
 import datetime
 
-# Enables audible announcements
+# Enables audible announcements for iterary
 SPEAK = False
 
 ATTRIBUTE_CHAR = "-"

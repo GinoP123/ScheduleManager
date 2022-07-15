@@ -83,7 +83,8 @@ def get_events(cache_path="/Users/ginoprasad/Scripts/ScheduleManager/cache/event
 
 def update_url_file(event, outfile_path):
 	with open(outfile_path, 'w') as outfile:
-		outfile.write("import webbrowser\n\n")
+		outfile.write("import subprocess as sp\n")
+		outfile.write('import external_scripts as ext\n\n')
 		outfile.write('"""\n\n')
 		outfile.write('\t' + event['name'] + '\n\n')
 		for description in event["descriptions"]:
@@ -91,7 +92,7 @@ def update_url_file(event, outfile_path):
 		outfile.write('\n"""\n\n')
 		for link in event["links"]:
 			outfile.write(f'url = "{link}"\n')
-			outfile.write("webbrowser.open(url)\n")
+			outfile.write("sp.run([ext.open_url_script, url, '1'])\n")
 
 
 def delete_event(event):
@@ -219,7 +220,6 @@ def main():
 
 	if distance < 5:
 		update_url_file(closest, pre.OUTFILE)
-		sp.run(f"{ext.change_chrome_profile} 1".split(), capture_output=True)
 		sp.run([ext.open_file_script, pre.OUTFILE])
 		if closest["open_auto"]:
 			import schedule_open_url

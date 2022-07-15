@@ -1,6 +1,7 @@
 import datetime
 import presets as pre
 
+
 def is_attribute(line):
 	return line.strip().startswith(pre.ATTRIBUTE_CHAR)
 
@@ -121,8 +122,6 @@ def first(d1, d2):
 
 
 def get_distance(d1, d2):
-	this_year_month_days = get_month_days(pre.YEAR)
-	next_year_month_days = get_month_days(pre.YEAR + 1)
 	date_1_days = get_abs_days(d1, pre.MONTH_NUM_DAYS_THIS)
 	if first(d1, d2):
 		date_2_days = get_abs_days(d2, pre.MONTH_NUM_DAYS_THIS)
