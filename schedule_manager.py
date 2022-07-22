@@ -85,7 +85,7 @@ def update_url_file(event, outfile_path):
 	with open(outfile_path, 'w') as outfile:
 		outfile.write("import subprocess as sp\n")
 		outfile.write('import external_scripts as ext\n\n')
-		outfile.write('"""\n\n')
+		outfile.write('_="""\n\n')
 		outfile.write('\t' + event['name'] + '\n\n')
 		for description in event["descriptions"]:
 			outfile.write('\t' + description + "\n")
