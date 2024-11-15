@@ -23,7 +23,7 @@ if shell.strip().lstrip('-') == '':
 
 for file in glob.glob("*.sh") + glob.glob("*/*.sh") + glob.glob("bin/*"):
 	with open(file) as infile:
-		file_output = infile.read().replace('#!/bin/bash', '#!' + os.environ['SHELL'])
+		file_output = infile.read().replace('#!/bin/zsh', '#!' + shell)
 
 	with open(file, 'w') as outfile:
 		outfile.write(file_output)

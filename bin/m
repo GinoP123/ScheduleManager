@@ -1,2 +1,2 @@
-#!/bin/bash
+#!/bin/zsh
 "$(dirname "$0")/../schedule_manager.py" print $*
