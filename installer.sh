@@ -14,7 +14,11 @@ with open('cache/events_cache.py', 'w') as outfile:
 for file in ['schedules/gcal_personal.txt', 'schedules/gcal_school.txt', 'schedules/local_events.txt', 'schedules/local_weekly.txt', 'cache/m_cache.txt']:
 	sp.run("touch " + file, shell=True)
 
-if os.environ['SHELL'].strip() == '':
+shell = os.environ['SHELL']
+shell = shell.strip().lstrip('-')
+shell = sp.run("which " + shell, shell=True, capture_output=True).stdout.decode().strip()
+
+if shell.strip().lstrip('-') == '':
 	exit(1)
 
 for file in glob.glob("*.sh") + glob.glob("*/*.sh") + glob.glob("bin/*"):
