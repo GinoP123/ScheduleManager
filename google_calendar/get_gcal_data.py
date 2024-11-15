@@ -89,7 +89,7 @@ def main(user=0, mandatory_refresh=False):
                 print("EXCEPTED Error")
 
         if (not (creds and creds.valid) or mandatory_refresh) and (not os.path.exists(settings.QUIET_PATH) or os.stat(settings.QUIET_PATH).st_size == 0):
-            sp.run(f"'{settings.CHROME_LOCATION}' --args --profile-directory='{settings.CHROME_PROFILES[user]}' &> /dev/null", shell=True)
+            sp.run(f"'{settings.CHROME_LOCATION}' --args --profile-directory='{settings.CHROME_PROFILES[user]}' --new_window &> /dev/null", shell=True)
             flow = InstalledAppFlow.from_client_secrets_file(
                 settings.CLIENT_SECRET_FILE, settings.SCOPES)
             creds = flow.run_local_server(port=0)
@@ -103,8 +103,8 @@ def main(user=0, mandatory_refresh=False):
         service = build('calendar', 'v3', credentials=creds)
 
         # Call the Calendar API
-        now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-        next_week = (datetime.datetime.utcnow() + datetime.timedelta(weeks=1)).isoformat() + 'Z'
+        now = datetime.datetime.now(datetime.timezone.utc).isoformat().split('+')[0] + 'Z'
+        next_week = (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(weeks=1)).isoformat().split('+')[0] + 'Z'
 
         events_result = service.events().list(calendarId='primary', timeMin=now, 
                                             timeMax=next_week, singleEvents=True,
