@@ -6,6 +6,7 @@ import subprocess as sp
 os.makedirs('cache', exist_ok=True)
 os.makedirs('log', exist_ok=True)
 os.makedirs('schedules', exist_ok=True)
+os.makedirs('google_calendar/json_files', exist_ok=True)
 
 with open('cache/events_cache.py', 'w') as outfile:
 	outfile.write('events = []\n')
@@ -18,7 +19,7 @@ if os.environ['SHELL'].strip() == '':
 
 for file in glob.glob("*.sh") + glob.glob("*/*.sh") + glob.glob("bin/*"):
 	with open(file) as infile:
-		file_output = infile.read().replace('#!/bin/zsh', '#!' + os.environ['SHELL'])
+		file_output = infile.read().replace('#!/bin/bash', '#!' + os.environ['SHELL'])
 
 	with open(file, 'w') as outfile:
 		outfile.write(file_output)
