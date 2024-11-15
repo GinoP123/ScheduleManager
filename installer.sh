@@ -5,6 +5,9 @@ import os, glob
 os.makedirs('cache', exist_ok=True)
 os.makedirs('log', exist_ok=True)
 
+with open('cache/events_cache.py', 'w') as outfile:
+	outfile.write('events = []\n')
+
 if os.environ['SHELL'].strip() == '':
 	exit(1)
 
