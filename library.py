@@ -32,7 +32,7 @@ def abs_time(string):
 	return (hour, minute)
 
 
-def is_time_slot(line_data, weekly):
+def is_time_slot(line_data, source):
 	if len(line_data) != 2 or line_data[1][-2:] not in pre.TIME_SUFFIXES:
 		return False
 
@@ -40,7 +40,7 @@ def is_time_slot(line_data, weekly):
 	if not (0 <= hour < 24 and 0 <= minute < 60):
 		return False
 
-	if weekly:
+	if 'w' in source:
 		return is_weekly_day(line_data[0])
 
 	date = line_data[0].split('/')
@@ -55,12 +55,16 @@ def is_time_slot(line_data, weekly):
 	return 0 < day <= month_days
 
 
-def get_time_slot(line_data, weekly=True):
+def get_time_slot(line_data, source=True):
 	assert len(line_data) == 2
-	if weekly:
+	if 'w' in source:
 		return (tuple([pre.DAY_TO_INT[pre.DAYS[ch]] for ch in line_data[0]]), abs_time(line_data[1]))
 	else:
 		return (tuple(map(lambda x: int(x), line_data[0].split('/'))), abs_time(line_data[1]))
+
+
+def get_formatted_current_datetime():
+	return datetime.datetime.now().strftime("%Y/%m/%d %H:%M")
 
 
 def get_current_datetime():
@@ -76,12 +80,15 @@ def time_distance(time_1, time_2):
 
 
 def is_link(line_data):
-	return len(line_data) == 1 and line_data[0].startswith("https://")
+	return line_data[0].startswith("https://") or line_data[0].startswith("Application:")
 
 
-def get_link(line_data):
-	assert len(line_data) == 1
-	return line_data[0]
+def get_link(line_data, source):
+	if 'p' in source:
+		line_data += ('0',)
+	elif 's' in source:
+		line_data += ('1',)
+	return ' '.join(line_data)
 
 
 def pad(num, length=2):

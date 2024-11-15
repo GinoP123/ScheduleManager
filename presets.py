@@ -1,3 +1,5 @@
+import os
+import sys
 import datetime
 
 # Enables audible announcements for iterary
@@ -11,9 +13,18 @@ TIME_SUFFIXES={"AM": 0, "PM": 12}
 
 YEAR=int(datetime.datetime.now().strftime("%Y"))
 
-WEEKLY_PATH = "schedules/weekly_schedule.txt"
-EVENTS_PATH = "schedules/events.txt"
-OUTFILE = "schedule_open_url.py"
+EVENTS_PATHS = {
+	'lw': "schedules/local_weekly.txt",
+	'le': "schedules/local_events.txt",
+	'gp': "schedules/gcal_personal.txt",
+	'gs': "schedules/gcal_school.txt"
+}
+
+OUTFILE = "schedule_open_url.sh"
+CACHE_PATH = f"cache/events_cache.py"
+CACHE_LOG_PATH = "log/cache_updates.txt"
+M_CACHE_PATH = "cache/m_cache.txt"
+PYTHON_LIB_LOCATION  = "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages"
 
 
 def get_month_days(year):

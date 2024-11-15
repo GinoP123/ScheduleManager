@@ -1,7 +1,9 @@
 schedules/*
 __pycache__/*
 cache/*
-schedule_open_url.py
+log/*
+google_calender/json_files/*
+schedule_open_url.sh
 external_scripts.py
 test.py
 .DS_Store
