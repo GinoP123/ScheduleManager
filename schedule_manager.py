@@ -99,7 +99,7 @@ def update_m_cache():
 
 def update_url_file(event, outfile_path):
 	with open(outfile_path, 'w') as outfile:
-		outfile.write("#!/bin/zsh\n\n")
+		outfile.write("#!/bin/bash\n\n")
 		# outfile.write("import subprocess as sp\n")
 		# outfile.write('import external_scripts as ext\n\n')
 		outfile.write(': \'\n\n')
@@ -243,7 +243,7 @@ def main():
 		update_url_file(closest, pre.OUTFILE)
 		sp.run([ext.open_file_script, pre.OUTFILE])
 		if closest["open_auto"] and 'links' in closest:
-			sp.run(f"/opt/homebrew/bin/ttab '{ext.schedule_open_url}; exit'", shell=True)
+			sp.run(f"{ext.shell_path} '{ext.schedule_open_url}'; exit", shell=True)
 		if closest['source'] == 'le':
 			delete_event(closest)
 	elif (distance == 30 or distance < 15) and not closest["silence"]:
