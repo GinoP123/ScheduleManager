@@ -6,7 +6,7 @@ QUIET_PATH = "/Users/ginoprasad/Scripts/miscellaneous/text_files/quiet.txt"
 
 CHROME_PROFILES = {
 	0: "Default",
-	1: "Profile 1"
+	1: "Profile 2"
 }
 
 TOKEN_FILES = {
