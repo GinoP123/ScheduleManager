@@ -1,7 +1,7 @@
 import os
 
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
-CLIENT_SECRET_FILE = "json_files/client_secret_file.json"
+CLIENT_SECRET_FILE = "json_files/gcal_client_secret_file.json"
 
 if os.path.exists("/usr/bin/google-chrome"):
 	CHROME_LOCATION = "/usr/bin/google-chrome"
@@ -22,8 +22,8 @@ TOKEN_FILES = {
 }
 
 OUTFILES = {
-	0: "../schedules/gcal_personal.txt",
-	1: "../schedules/gcal_school.txt"
+	0: "schedules/gcal_personal.txt",
+	1: "schedules/gcal_school.txt"
 }
 
 ZOOM_SUBSTRINGS = ["Join Zoom Meeting", "Meeting URL"]
