@@ -5,8 +5,7 @@ import sys
 import subprocess as sp
 import library as lb
 import presets as pre
-import external_scripts as ext
-
+import settings
 
 def parse(source):
 	path = pre.EVENTS_PATHS[source]
@@ -107,7 +106,7 @@ def update_url_file(event, outfile_path):
 		for description in event["descriptions"]:
 			outfile.write('\t' + description + "\n")
 		outfile.write('\n\'\n\n')
-		outfile.write(f'open_link_script="{ext.open_link_script}"\n')
+		outfile.write(f'open_link_script="{os.getcwd()}/{settings.open_link_script}"\n')
 		for link in event["links"]:
 			profile = ""
 			if not link.startswith("Application: ") and link.count(' '):
@@ -241,9 +240,9 @@ def main():
 
 	if distance < 5:
 		update_url_file(closest, pre.OUTFILE)
-		sp.run([ext.open_file_script, pre.OUTFILE])
+		sp.run([settings.open_file_script, pre.OUTFILE])
 		if closest["open_auto"] and 'links' in closest:
-			sp.run(f"{ext.shell_path} '{ext.schedule_open_url}'; exit", shell=True)
+			sp.run(f"{settings.shell_path} '{settings.schedule_open_url}'; exit", shell=True)
 		if closest['source'] == 'le':
 			delete_event(closest)
 	elif (distance == 30 or distance < 15) and not closest["silence"]:

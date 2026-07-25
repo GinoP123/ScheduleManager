@@ -9,7 +9,6 @@ else:
 	CHROME_LOCATION = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
 PYTHON_LIB_LOCATION = "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages"
-QUIET_PATH = "/Users/ginoprasad/Scripts/miscellaneous/text_files/quiet.txt"
 
 CHROME_PROFILES = {
 	0: "Default",
@@ -32,4 +31,11 @@ LINK_PREFIX = "https://"
 HOURS_PER_DAY = 24
 MIN_PER_HOUR = SECONDS_PER_MIN = 60
 HOUR_THRESHOLD = 9
+
+QUIET_PATH = "cache/quiet.txt"
+
+open_link_script = "bin/open_url.sh"
+schedule_open_url = "schedule_open_url.sh"
+shell_path = "/bin/bash"
+open_file_script = "/usr/bin/subl"
 

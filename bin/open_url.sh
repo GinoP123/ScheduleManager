@@ -1,12 +1,9 @@
 #!/bin/bash
 
+cd "$(dirname "$0")/.."
 
+chrome_path=$(python3 -c "import settings; print(settings.CHROME_LOCATION)")
+profile=$(python3 -c "import settings; profile_num=int(\"$2\") if \"$2\".isnumeric() else 0; print(settings.CHROME_PROFILES[profile_num])")
 
-if [[ "$1" == "1" ]]; then
-	/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --args --profile-directory="Profile 6" &> /dev/null
-elif [[ "$1" == "2" ]]; then
-	/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --args --profile-directory="Profile 8" &> /dev/null
-else
-	/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --args --profile-directory="Default" &> /dev/null
-fi
+"$chrome_path" --args "$1" --profile-directory="$profile" &> /dev/null
 
