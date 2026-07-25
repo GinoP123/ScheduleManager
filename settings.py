@@ -37,5 +37,11 @@ QUIET_PATH = "cache/quiet.txt"
 open_link_script = "bin/open_url.sh"
 schedule_open_url = "schedule_open_url.sh"
 shell_path = "/bin/bash"
-open_file_script = "/usr/bin/subl"
+
+if os.path.exists("/usr/bin/subl"):
+	open_file_script = "/usr/bin/subl"
+elif os.path.exists("/usr/local/bin/subl"):
+	open_file_script = "/usr/local/bin/subl"
+else:
+	open_file_script = "/usr/bin/vim"
 
