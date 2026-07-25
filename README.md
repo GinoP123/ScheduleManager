@@ -7,8 +7,8 @@
 ```
 git clone https://github.com/GinoP123/ScheduleManager.git
 cd ScheduleManager
-mv $HOME/Downloads/gcal_client_secret_file.json json_files
 ./installer.sh
+mv $HOME/Downloads/gcal_client_secret_file.json json_files
 ```
 3. Check that the Google Calendar parsing works:
 ```
