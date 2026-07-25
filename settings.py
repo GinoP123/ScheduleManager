@@ -3,7 +3,7 @@ import os
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 CLIENT_SECRET_FILE = "json_files/client_secret_file.json"
 
-if os.path.exists("/usr/bin/google-chrome")
+if os.path.exists("/usr/bin/google-chrome"):
 	CHROME_LOCATION = "/usr/bin/google-chrome"
 else:
 	CHROME_LOCATION = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
