@@ -1,6 +1,6 @@
 import os
 
-SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+SCOPES = ['https://www.googleapis.com/auth/calendar.events']
 CLIENT_SECRET_FILE = "json_files/gcal_client_secret_file.json"
 
 if os.path.exists("/usr/bin/google-chrome"):
