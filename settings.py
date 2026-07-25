@@ -1,6 +1,13 @@
+import os
+
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 CLIENT_SECRET_FILE = "json_files/client_secret_file.json"
-CHROME_LOCATION = "/usr/bin/google-chrome"
+
+if os.path.exists("/usr/bin/google-chrome")
+	CHROME_LOCATION = "/usr/bin/google-chrome"
+else:
+	CHROME_LOCATION = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+
 PYTHON_LIB_LOCATION = "/Library/Frameworks/Python.framework/Versions/3.9/lib/python3.9/site-packages"
 QUIET_PATH = "/Users/ginoprasad/Scripts/miscellaneous/text_files/quiet.txt"
 
