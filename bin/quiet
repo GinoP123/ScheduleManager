@@ -1,0 +1,12 @@
+#!/bin/bash
+
+cd "$(dirname "$0")"
+quiet_path="../text_files/quiet.txt"
+
+if [[ $(cat "$quiet_path") == "" ]]; then
+	echo -e "\n\tQuiet Mode On\n"
+	echo "Quiet" > "$quiet_path"
+else
+	echo -e "\n\tQuiet Mode Off\n"
+	echo -n "" > "$quiet_path"
+fi

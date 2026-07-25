@@ -1,0 +1,12 @@
+#!/bin/bash
+
+cd "$(dirname "$0")"
+focus_on=$(/usr/bin/defaults read com.apple.controlcenter "NSStatusItem Visible FocusModes")
+
+quiet_path="../text_files/quiet.txt"
+quiet_script="./quiet"
+quiet_status=$(cat "$quiet_path")
+if [[ ( $focus_on == 1  && $quiet_status == "" ) ||  ( $focus_on == 0  && $quiet_status != "" ) ]]; then
+	"$quiet_script"
+fi
+	
