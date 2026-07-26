@@ -39,12 +39,9 @@ def get_event_template(summary):
 def get_events_day(date):
     date_start, date_end = (datetime.datetime.combine(date, x) for x in 
                               (datetime.time(0, 0, 0), datetime.time(23, 59, 59)))
-
     date_start, date_end = map(datetime_to_utc, (date_start, date_end))
-
     events_all = service.events().list(calendarId='primary', timeMin=date_start, timeMax=date_end, 
                                    singleEvents=True, orderBy='startTime').execute()['items']
-    
     
     events = set()
     for event in events_all:
