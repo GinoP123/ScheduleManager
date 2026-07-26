@@ -54,6 +54,7 @@ def get_events_day(date):
 if __name__ == '__main__':
     os.chdir(os.path.dirname(sys.argv[0]))
     os.environ['MAILTO'] = ""
+
     for user in settings.CHROME_PROFILES:
     	token_file = settings.TOKEN_FILES[user]
     	creds = Credentials.from_authorized_user_file(token_file, settings.SCOPES)
