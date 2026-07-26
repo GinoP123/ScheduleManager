@@ -3,6 +3,7 @@
 import os
 import sys
 import subprocess as sp
+import time
 import datetime
 import settings
 sys.path.append(settings.PYTHON_LIB_LOCATION)
@@ -89,7 +90,9 @@ def main(user=0, mandatory_refresh=False):
                 print("EXCEPTED Error")
 
         if (not (creds and creds.valid) or mandatory_refresh) and (not os.path.exists(settings.QUIET_PATH) or os.stat(settings.QUIET_PATH).st_size == 0):
+            time.sleep(0.5)
             sp.run(f"'{settings.CHROME_LOCATION}' --args --profile-directory='{settings.CHROME_PROFILES[user]}' --new_window &> /dev/null", shell=True)
+            time.sleep(0.5)
             flow = InstalledAppFlow.from_client_secrets_file(
                 settings.CLIENT_SECRET_FILE, settings.SCOPES)
             creds = flow.run_local_server(port=0)
