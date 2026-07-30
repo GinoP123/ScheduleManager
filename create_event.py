@@ -42,10 +42,7 @@ def get_events_day(date):
     events_all = service.events().list(calendarId='primary', timeMin=date_start, timeMax=date_end, 
                                    singleEvents=True, orderBy='startTime').execute()['items']
     
-    events = set()
-    for event in events_all:
-        if 'attendees' not in event and 'description' not in event:
-            events.add(event['summary'])
+    events = {event['summary'] for event in events_all}
     return events
 
 
@@ -61,13 +58,21 @@ if __name__ == '__main__':
     if len(sys.argv) > 2 and int(sys.argv[2]) in settings.CHROME_PROFILES:
         user = int(sys.argv[2])
 
+    emails = None
+    if len(sys.argv) > 3:
+        emails = [{'email': x} for x in sys.argv[3:]]
+
     token_file = settings.TOKEN_FILES[user]
     creds = Credentials.from_authorized_user_file(token_file, settings.SCOPES)
     service = build('calendar', 'v3', credentials=creds)
 
     today = (datetime.datetime.now(ZoneInfo(settings.TIMEZONE))).date()
+
     if event_summary not in get_events_day(today):
         event_body = get_event_template(event_summary)
+        if emails is not None:
+            event_body['attendees'] = emails
+
         created_event = service.events().insert(
             calendarId='primary', 
             body=event_body,
