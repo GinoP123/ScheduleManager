@@ -70,6 +70,7 @@ if __name__ == '__main__':
         event_body = get_event_template(event_summary)
         created_event = service.events().insert(
             calendarId='primary', 
-            body=event_body
+            body=event_body,
+            sendUpdates='all'
         ).execute()
 
