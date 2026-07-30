@@ -21,15 +21,14 @@ def datetime_to_utc(dt):
 
 def get_event_template(summary):
     today = datetime.datetime.now(ZoneInfo(settings.TIMEZONE)).date()
-    tomorrow = (today + datetime.timedelta(days=1)).strftime('%Y-%m-%d')
     event_body = {
         'summary': summary,
         'start': {
-            'dateTime': f'{tomorrow}T17:00:00-07:00',
+            'dateTime': f'{today}T17:00:00-07:00',
             'timeZone': settings.TIMEZONE,
         },
         'end': {
-            'dateTime': f'{tomorrow}T23:59:00-07:00',
+            'dateTime': f'{today}T23:59:00-07:00',
             'timeZone': settings.TIMEZONE,
         },
     }
@@ -55,17 +54,22 @@ if __name__ == '__main__':
     os.chdir(os.path.dirname(sys.argv[0]))
     os.environ['MAILTO'] = ""
 
-    for user in settings.CHROME_PROFILES:
-    	token_file = settings.TOKEN_FILES[user]
-    	creds = Credentials.from_authorized_user_file(token_file, settings.SCOPES)
-    	service = build('calendar', 'v3', credentials=creds)
+    assert len(sys.argv) > 1
+    event_summary = sys.argv[1]
 
-    	today = (datetime.datetime.now(ZoneInfo(settings.TIMEZONE))).date()
-    	tomorrow = today +  datetime.timedelta(days=1)
-    	for event_summary in get_events_day(today) - get_events_day(tomorrow):
-    	    event_body = get_event_template(event_summary)
-    	    created_event = service.events().insert(
-    	        calendarId='primary', 
-    	        body=event_body
-    	    ).execute()
+    user = 0
+    if len(sys.argv) > 2 and int(sys.argv[2]) in settings.CHROME_PROFILES:
+        user = int(sys.argv[2])
+
+    token_file = settings.TOKEN_FILES[user]
+    creds = Credentials.from_authorized_user_file(token_file, settings.SCOPES)
+    service = build('calendar', 'v3', credentials=creds)
+
+    today = (datetime.datetime.now(ZoneInfo(settings.TIMEZONE))).date()
+    if event_summary not in get_events_day(today):
+        event_body = get_event_template(event_summary)
+        created_event = service.events().insert(
+            calendarId='primary', 
+            body=event_body
+        ).execute()
 
