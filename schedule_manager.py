@@ -33,8 +33,6 @@ def parse(source):
 					curr["silence"] = True
 				elif lb.is_time_slot(line_data, source=source):
 					time_slot = lb.get_time_slot(line_data, source=source)
-					# if time_slot in time_slots:
-					# 	raise TypeError("ERROR: Multiple Events In Same Timeslot")
 					time_slots.add(time_slot)
 					curr["time_slot"] = time_slot
 				elif lb.is_link(line_data):
@@ -99,8 +97,6 @@ def update_m_cache():
 def update_url_file(event, outfile_path):
 	with open(outfile_path, 'w') as outfile:
 		outfile.write("#!/bin/bash\n\n")
-		# outfile.write("import subprocess as sp\n")
-		# outfile.write('import external_scripts as ext\n\n')
 		outfile.write(': \'\n\n')
 		outfile.write('\t' + event['name'] + '\n\n')
 		for description in event["descriptions"]:
