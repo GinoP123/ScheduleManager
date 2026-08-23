@@ -11,6 +11,6 @@ os.makedirs('json_files', exist_ok=True)
 with open('cache/events_cache.py', 'w') as outfile:
 	outfile.write('events = []\n')
 
-for file in ['schedules/gcal_personal.txt', 'schedules/gcal_school.txt', 'schedules/local_events.txt', 'schedules/local_weekly.txt', 'cache/m_cache.txt', 'cache/quiet.txt']:
+for file in ['schedules/gcal_personal.txt', 'schedules/gcal_school.txt', 'cache/m_cache.txt', 'cache/quiet.txt']:
 	sp.run("touch " + file, shell=True)
 

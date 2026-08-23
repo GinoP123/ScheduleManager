@@ -1,5 +1,19 @@
 import os
 
+ATTRIBUTE_CHAR = "-"
+SPEAK = False
+
+EVENTS_PATHS = {
+	'gp': "schedules/gcal_personal.txt",
+	'gs': "schedules/gcal_school.txt"
+}
+
+OUTFILE = "schedule_open_url.sh"
+CACHE_PATH = f"cache/events_cache.py"
+CACHE_LOG_PATH = "log/cache_updates.txt"
+M_CACHE_PATH = "cache/m_cache.txt"
+
+
 SCOPES = ['https://www.googleapis.com/auth/calendar.events']
 
 CLIENT_SECRET_FILE = "json_files/gcal_client_secret_file.json"

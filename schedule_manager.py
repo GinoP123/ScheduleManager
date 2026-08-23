@@ -4,11 +4,10 @@ import os
 import sys
 import subprocess as sp
 import library as lb
-import presets as pre
 import settings
 
 def parse(source):
-	path = pre.EVENTS_PATHS[source]
+	path = settings.EVENTS_PATHS[source]
 	events = []
 	time_slots = set()
 
@@ -19,7 +18,7 @@ def parse(source):
 			line = line.strip()
 			if not line:
 				continue
-			elif not line.startswith(pre.ATTRIBUTE_CHAR):
+			elif not line.startswith(settings.ATTRIBUTE_CHAR):
 				if curr and 'time_slot' in curr:
 					curr["index"][1] = i
 					events.append(curr)
@@ -49,22 +48,22 @@ def parse(source):
 
 def get_events_parse():
 	events = []
-	for source in pre.EVENTS_PATHS:
+	for source in settings.EVENTS_PATHS:
 		if 'w' in source:
 			events.extend(parse(source))
 			continue
 		for event in parse(source):
 			day_dist = lb.day_distance(lb.get_current_datetime_full(), event['time_slot'])
-			if day_dist < len(pre.DAYS) or event['time_slot'][0] == lb.get_current_datetime_full()[0]:
+			if day_dist < len(settings.DAYS) or event['time_slot'][0] == lb.get_current_datetime_full()[0]:
 				event['time_slot'] = ((lb.get_day(event['time_slot']),), event['time_slot'][1])
 				events.append(event)
 	return events
 
 
 def update_cache(events):
-	with open(pre.CACHE_LOG_PATH, 'a') as outfile:
+	with open(settings.CACHE_LOG_PATH, 'a') as outfile:
 		outfile.write(lb.get_formatted_current_datetime() + '\n')
-	with open(pre.CACHE_PATH, 'w') as outfile:
+	with open(settings.CACHE_PATH, 'w') as outfile:
 		outfile.write("events = [\n")
 		for event in events:
 			outfile.write(f"\t{event},\n")
@@ -72,10 +71,10 @@ def update_cache(events):
 
 
 def get_events():
-	cache_mtime = os.path.getmtime(pre.CACHE_PATH)
+	cache_mtime = os.path.getmtime(settings.CACHE_PATH)
 	current_time = os.times().elapsed
 
-	files_updated = any((os.path.getmtime(path) - cache_mtime >= 0 for path in pre.EVENTS_PATHS.values()))
+	files_updated = any((os.path.getmtime(path) - cache_mtime >= 0 for path in settings.EVENTS_PATHS.values()))
 	new_day = bool((current_time - cache_mtime) // (24 * 60 * 60))
 
 	if files_updated or new_day:
@@ -87,7 +86,7 @@ def get_events():
 
 
 def update_m_cache():
-	with open(pre.M_CACHE_PATH, 'r+') as file:
+	with open(settings.M_CACHE_PATH, 'r+') as file:
 		meetings_str = print_meetings(0, 'silence', to_str=True)
 		if file.read() != meetings_str:
 			file.seek(0)
@@ -115,7 +114,7 @@ def update_url_file(event, outfile_path):
 
 
 def delete_event(event):
-	path = pre.EVENTS_PATHS[event['source']]
+	path = settings.EVENTS_PATHS[event['source']]
 	start, end = event["index"]
 	with open(path) as infile:
 		lines = infile.readlines()
@@ -177,7 +176,7 @@ def get_new_event_data():
 
 def create_event():
 	event, source = get_new_event_data()
-	path = pre.EVENTS_PATHS[source]
+	path = settings.EVENTS_PATHS[source]
 
 	with open(path, 'a') as outfile:
 		outfile.write(event)
@@ -185,10 +184,11 @@ def create_event():
 
 
 def print_meetings(day_diff='0', silence_empty=False, to_str=False):
+	# TODO
 	current_datetime, day_diff, silence_empty = lb.get_current_datetime(), int(day_diff), silence_empty == 'silence'
 	if day_diff != 0:
 		current_datetime = ((current_datetime[0] + day_diff) % 7, (0, 0))
-	day_name = list(pre.DAY_TO_INT.keys())[current_datetime[0]]
+	day_name = list(settings.DAY_TO_INT.keys())[current_datetime[0]]
 
 	events = get_events()
 	meetings = []
@@ -220,7 +220,7 @@ def print_meetings(day_diff='0', silence_empty=False, to_str=False):
 		return message + '\n' if message else ''
 	print(message)
 
-	if pre.SPEAK:
+	if settings.SPEAK:
 		for announcement in announcements:
 			sp.run(announcement.split())
 
@@ -236,8 +236,8 @@ def main():
 	distance = lb.time_distance(current_datetime, closest['time_slot'])
 
 	if distance < 5:
-		update_url_file(closest, pre.OUTFILE)
-		sp.run([settings.open_file_script, pre.OUTFILE])
+		update_url_file(closest, settings.OUTFILE)
+		sp.run([settings.open_file_script, settings.OUTFILE])
 		if closest["open_auto"] and 'links' in closest:
 			sp.run(f"{settings.shell_path} '{settings.schedule_open_url}'; exit", shell=True)
 		if closest['source'] == 'le':
@@ -250,7 +250,6 @@ def main():
 
 if __name__ == '__main__':
 	os.chdir(os.path.dirname(sys.argv[0]))
-	sys.path.append(pre.PYTHON_LIB_LOCATION)
 	if len(sys.argv) >= 2:
 		if sys.argv[1] == 'print':
 			print_meetings(*sys.argv[2:])
