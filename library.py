@@ -33,13 +33,15 @@ def abs_time(string):
 
 
 def is_time_slot(line_data, source):
-	if len(line_data) != 2 or line_data[1][-2:] not in pre.TIME_SUFFIXES:
+	if len(line_data) != 4 or line_data[2] != '-' or \
+		line_data[1][-2:] not in pre.TIME_SUFFIXES or line_data[3][-2:] not in pre.TIME_SUFFIXES:
 		return False
+	s_hour, s_minute = abs_time(line_data[1])
+	e_hour, e_minute = abs_time(line_data[3])
 
-	hour, minute = abs_time(line_data[1])
-	if not (0 <= hour < 24 and 0 <= minute < 60):
-		return False
-
+	for (hour, minute) in zip((s_hour, e_hour), (s_minute, e_minute)):
+		if not (0 <= hour < 24 and 0 <= minute < 60):
+			return False
 	if 'w' in source:
 		return is_weekly_day(line_data[0])
 
@@ -47,7 +49,7 @@ def is_time_slot(line_data, source):
 	if len(date) != 2:
 		return False
 	month, day = map(lambda x: int(x.strip()), date)
-	if first(get_current_datetime_full(), ((month, day), (hour, minute))):
+	if first(get_current_datetime_full(), ((month, day), (e_hour, e_minute))):
 		month_days = pre.MONTH_NUM_DAYS_THIS[month - 1]
 	else:
 		month_days = pre.MONTH_NUM_DAYS_NEXT[month - 1]
@@ -56,11 +58,11 @@ def is_time_slot(line_data, source):
 
 
 def get_time_slot(line_data, source=True):
-	assert len(line_data) == 2
+	assert len(line_data) == 4
 	if 'w' in source:
-		return (tuple([pre.DAY_TO_INT[pre.DAYS[ch]] for ch in line_data[0]]), abs_time(line_data[1]))
+		return (tuple([pre.DAY_TO_INT[pre.DAYS[ch]] for ch in line_data[0]]), abs_time(line_data[1]), abs_time(line_data[3]))
 	else:
-		return (tuple(map(lambda x: int(x), line_data[0].split('/'))), abs_time(line_data[1]))
+		return (tuple(map(lambda x: int(x), line_data[0].split('/'))), abs_time(line_data[1]), abs_time(line_data[3]))
 
 
 def get_formatted_current_datetime():

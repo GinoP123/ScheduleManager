@@ -33,6 +33,7 @@ def parse(source):
 					curr["silence"] = True
 				elif lb.is_time_slot(line_data, source=source):
 					time_slot = lb.get_time_slot(line_data, source=source)
+					print(time_slot)
 					time_slots.add(time_slot)
 					curr["time_slot"] = time_slot
 				elif lb.is_link(line_data):

@@ -50,11 +50,10 @@ def write_events(events, outfile_path):
     events_str = ''
     for event in events:
         event_info = [event['summary']]
-        if event['start'].get('dateTime') is None:
-            start = datetime.datetime.strptime(event['start'].get('date')[:16], '%Y-%m-%d') + datetime.timedelta(hours=12)
-        else:
-            start = datetime.datetime.strptime(event['start'].get('dateTime')[:16], '%Y-%m-%dT%H:%M')
-        event_info.append(start.strftime("%m/%d %I:%M%p"))
+        start = datetime.datetime.strptime(event['start'].get('dateTime')[:16], '%Y-%m-%dT%H:%M')
+        end = datetime.datetime.strptime(event['end'].get('dateTime')[:16], '%Y-%m-%dT%H:%M')
+
+        event_info.append(f"{start.strftime('%m/%d %I:%M%p')} - {end.strftime('%I:%M%p')}")
         if 'conferenceData' in event and 'entryPoints' in event['conferenceData']:
             for entry_point in event['conferenceData']['entryPoints']:
                 if entry_point['entryPointType'] == 'video':
