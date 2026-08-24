@@ -7,3 +7,5 @@ profile=$(python3 -c "import settings; profile_num=int(\"$2\") if \"$2\".isnumer
 
 "$chrome_path" --args "$1" --profile-directory="$profile" &> /dev/null
 
+sleep 1
+
