@@ -1,5 +1,10 @@
 import os
 
+
+TIME_FORMAT = "%I:%M%p"
+DATE_FORMAT = f"%m/%d/%Y {TIME_FORMAT}"
+PRINT_FORMAT = "%I:%M %p"
+GCAL_FORMAT = '%Y-%m-%dT%H:%M'
 ATTRIBUTE_CHAR = "-"
 SPEAK = False
 

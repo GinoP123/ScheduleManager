@@ -30,9 +30,8 @@ def parse(source):
 					curr["open_auto"] = False
 				elif ' '.join(line_data).lower() == "silence notifications":
 					curr["silence"] = True
-				elif lb.is_time_slot(line_data, source=source):
-					time_slot = lb.get_time_slot(line_data, source=source)
-					print(time_slot)
+				elif lb.is_time_slot(line_data):
+					time_slot = lb.get_time_slot(line_data)
 					time_slots.add(time_slot)
 					curr["time_slot"] = time_slot
 				elif lb.is_link(line_data):
@@ -49,22 +48,17 @@ def parse(source):
 def get_events_parse():
 	events = []
 	for source in settings.EVENTS_PATHS:
-		if 'w' in source:
-			events.extend(parse(source))
-			continue
 		for event in parse(source):
-			day_dist = lb.day_distance(lb.get_current_datetime_full(), event['time_slot'])
-			if day_dist < len(settings.DAYS) or event['time_slot'][0] == lb.get_current_datetime_full()[0]:
-				event['time_slot'] = ((lb.get_day(event['time_slot']),), event['time_slot'][1])
-				events.append(event)
+			events.append(event)
 	return events
 
 
 def update_cache(events):
 	with open(settings.CACHE_LOG_PATH, 'a') as outfile:
-		outfile.write(lb.get_formatted_current_datetime() + '\n')
+		now = lb.get_current_datetime()
+		outfile.write(now.strftime(settings.DATE_FORMAT) + '\n')
 	with open(settings.CACHE_PATH, 'w') as outfile:
-		outfile.write("events = [\n")
+		outfile.write("import datetime\n\nevents = [\n")
 		for event in events:
 			outfile.write(f"\t{event},\n")
 		outfile.write("]\n")
@@ -77,7 +71,8 @@ def get_events():
 	files_updated = any((os.path.getmtime(path) - cache_mtime >= 0 for path in settings.EVENTS_PATHS.values()))
 	new_day = bool((current_time - cache_mtime) // (24 * 60 * 60))
 
-	if files_updated or new_day:
+	# TODO
+	if True or files_updated or new_day:
 		events = get_events_parse()
 		update_cache(events)
 	else:
@@ -133,69 +128,15 @@ def convert_to_event_format(name, time_slot, link, description):
 	return '\n\t- '.join(information) + '\n\n'
 
 
-def get_new_event_data():
-	name_question = "\tName: "
-	weekly_question = "\tWeekly Event (y or n): "
-	days_question = "\tDays: "
-	date_question = "\tDate: "
-	time_question = "\tTime: "
-	link_question = "\tLink: "
-	description_question = "\tDescription: "
-
-	print()
-	name = input(name_question).strip()
-	while not name:
-		name = input(name_question).strip()
-
-	weekly = input(weekly_question).strip().lower()
-	while weekly not in ('y', 'n'):
-		weekly = input(weekly_question).strip().lower()
-	source = 'lw' if weekly == 'y' else 'le'
-
-	date = time_slot = days = ""
-	while not lb.is_time_slot(time_slot, source=source):
-		if weekly == 'y':
-			days = input(days_question).upper()
-			while not lb.is_weekly_day(days):
-				days = input(days_question).upper()
-		else:
-			date = input(date_question)
-		
-		time = input(time_question)
-		time_slot = (f"{days}{date}", time)
-
-	link = input(link_question).strip()
-	while link and not lb.is_link((link,)):
-		link = input(link_question).strip()
-
-	description = input(description_question).strip()
-	print()
-
-	return convert_to_event_format(name, time_slot, link, description), source
-
-
-def create_event():
-	event, source = get_new_event_data()
-	path = settings.EVENTS_PATHS[source]
-
-	with open(path, 'a') as outfile:
-		outfile.write(event)
-	print("\tEvent Successfully Created!\n")
-
-
-def print_meetings(day_diff='0', silence_empty=False, to_str=False):
-	# TODO
-	current_datetime, day_diff, silence_empty = lb.get_current_datetime(), int(day_diff), silence_empty == 'silence'
-	if day_diff != 0:
-		current_datetime = ((current_datetime[0] + day_diff) % 7, (0, 0))
-	day_name = list(settings.DAY_TO_INT.keys())[current_datetime[0]]
+def print_meetings(silence_empty=False, to_str=False):
+	now = lb.get_current_datetime()
+	day_name = now.strftime('%A')
 
 	events = get_events()
 	meetings = []
 	
 	for event in events:
-		if current_datetime[0] in event['time_slot'][0] and \
-			lb.time_distance(current_datetime, event['time_slot']) < (24 * 60):
+		if now.date() == event['time_slot'][0].date():
 			meetings.append(event)
 
 	message = ""
@@ -208,13 +149,12 @@ def print_meetings(day_diff='0', silence_empty=False, to_str=False):
 			message += f"\n\tNo Events {day_name}\n"
 			announcements.append(f"say No Events {day_name}")
 
-	for event in sorted(meetings, key=lambda ev: ev['time_slot'][1]):
+	for event in sorted(meetings, key=lambda ev: ev['time_slot'][0]):
 		name = event['name']
-		hours, minutes = event['time_slot'][1]
-		time = lb.get_time_name(*event['time_slot'][1])
-		time_string = "\t\t{}:{} {}".format(*time)
+		time = event['time_slot'][0].strftime(settings.PRINT_FORMAT)
+		time_string = f"\t\t{time}"
 		message += '\t'.join((time_string, name)) + "\n"
-		announcements.append(f"say {name} at {int(time[0])} {minutes if minutes else ''} {time[2]}")
+		announcements.append(f"say {name} at {time}")
 
 	if to_str:
 		return message + '\n' if message else ''
@@ -240,8 +180,6 @@ def main():
 		sp.run([settings.open_file_script, settings.OUTFILE])
 		if closest["open_auto"] and 'links' in closest:
 			sp.run(f"{settings.shell_path} '{settings.schedule_open_url}'; exit", shell=True)
-		if closest['source'] == 'le':
-			delete_event(closest)
 	elif (distance == 30 or distance < 15) and not closest["silence"]:
 		plural = lambda x: 's' if x != 1 else ''
 		sp.run(f"say '{closest['name']} in {distance} minute{plural(distance)}' 2> /dev/null", shell=True)

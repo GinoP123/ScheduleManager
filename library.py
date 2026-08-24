@@ -2,6 +2,28 @@ import datetime
 import settings
 
 
+def is_time_slot(line_data):
+	if len(line_data) != 4 or line_data[2] != '-':
+		return False
+
+	try:
+		get_time_slot(line_data)
+	except AssertionError as e:
+		print("HERE")
+		return False
+	return True
+
+def get_time_slot(line_data):
+	assert len(line_data) == 4
+	date, start, _, end = line_data
+	return (datetime.datetime.strptime(f"{date} {start}", settings.DATE_FORMAT),
+			datetime.datetime.strptime(f"{date} {end}", settings.DATE_FORMAT))
+
+
+def get_current_datetime():
+	return datetime.datetime.now().replace(microsecond=0, second=0)
+
+
 def is_attribute(line):
 	return line.strip().startswith(settings.ATTRIBUTE_CHAR)
 
@@ -28,34 +50,4 @@ def pad(num, length=2):
 		return str(num)
 	elif len(str(num)) < length:
 		return '0' * (length - len(str(num))) + str(num)
-
-
-def get_time_name(hours, minutes):
-	return f"{pad(hours % 12) if hours % 12 else 12} {pad(minutes)} {'AM' if hours < 12 else 'PM'}".split(' ')
-
-
-def get_current_datetime_full():
-	now = datetime.datetime.now()
-	date = (now.month, now.day)
-	return (date, get_current_datetime()[1])
-
-
-def get_abs_days(date, year_month_days):
-	(month, days), _ = date
-	days_ = 0
-	for month_num in range(month):
-		if month_num == month - 1:
-			days_ += days
-		else:
-			days_ += year_month_days[month_num]
-	return days_
-
-
-def first(d1, d2):
-	for c1, c2 in zip(d1[0] + d1[1], d2[0] + d2[1]):
-		if c1 > c2:
-			return False
-		elif c1 < c2:
-			return True
-	return True
 
