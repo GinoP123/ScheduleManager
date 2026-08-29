@@ -22,12 +22,12 @@ def parse(source):
 				if curr and 'time_slot' in curr:
 					curr["index"][1] = i
 					events.append(curr)
-				curr = {"name": line, "descriptions": [], "links": [], "index": [i, None], "source": source, "open_auto": True, "silence": False}
+				curr = {"name": line, "descriptions": [], "links": [], "index": [i, None], "source": source, "open_auto": False, "silence": False}
 			elif "name" in curr:
 				line_data = lb.get_attribute_data(line)
 
-				if ' '.join(line_data).lower() == 'do not open automatically':
-					curr["open_auto"] = False
+				if ' '.join(line_data).lower() == 'open automatically':
+					curr["open_auto"] = True
 				elif ' '.join(line_data).lower() == "silence notifications":
 					curr["silence"] = True
 				elif lb.is_time_slot(line_data):
@@ -82,7 +82,7 @@ def get_events():
 
 def update_m_cache():
 	with open(settings.M_CACHE_PATH, 'r+') as file:
-		meetings_str = print_meetings(0, 'silence', to_str=True)
+		meetings_str = print_meetings(silence_empty=False, to_str=True)
 		if file.read() != meetings_str:
 			file.seek(0)
 			file.truncate()
@@ -172,9 +172,9 @@ def main():
 	if not events:
 		exit(0)
 
-	closest = min(events, key=lambda x: lb.time_distance(current_datetime, x['time_slot']))
-	distance = lb.time_distance(current_datetime, closest['time_slot'])
-
+	closest = min(events, key=lambda x: (current_datetime - x['time_slot'][0]).total_seconds())
+	distance = (current_datetime - closest['time_slot'][0]).total_seconds()
+	print(closest)
 	if distance < 5:
 		update_url_file(closest, settings.OUTFILE)
 		sp.run([settings.open_file_script, settings.OUTFILE])
