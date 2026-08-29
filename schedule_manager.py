@@ -174,12 +174,12 @@ def main():
 
 	closest = min(events, key=lambda x: (current_datetime - x['time_slot'][0]).total_seconds())
 	distance = (current_datetime - closest['time_slot'][0]).total_seconds()
-	print(closest)
 	if distance < 5:
 		update_url_file(closest, settings.OUTFILE)
-		sp.run([settings.open_file_script, settings.OUTFILE])
-		if closest["open_auto"] and 'links' in closest:
-			sp.run(f"{settings.shell_path} '{settings.schedule_open_url}'; exit", shell=True)
+		if distance >= 0:
+			sp.run([settings.open_file_script, settings.OUTFILE])
+			if closest["open_auto"] and 'links' in closest:
+				sp.run(f"{settings.shell_path} '{settings.schedule_open_url}'; exit", shell=True)
 	elif (distance == 30 or distance < 15) and not closest["silence"]:
 		plural = lambda x: 's' if x != 1 else ''
 		sp.run(f"say '{closest['name']} in {distance} minute{plural(distance)}' 2> /dev/null", shell=True)
