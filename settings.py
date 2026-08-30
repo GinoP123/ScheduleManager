@@ -70,6 +70,6 @@ TIMEZONE = 'America/Los_Angeles'
 
 # Monitor
 log_path = 'log/cron_log.txt'
-emails = ['giprasad@ucsd.edu']
+logging_emails = ['giprasad@ucsd.edu']
 create_event_path = "./create_event.py"
 error_message = "ScheduleManager Ran Into Error!!!"
