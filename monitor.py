@@ -12,7 +12,7 @@ os.chdir(os.path.realpath(os.path.dirname(sys.argv[0])))
 with open(settings.log_path) as infile:
     logging = infile.read()
 
-date_regex = r'[A-Z][a-z]{2} [A-Z][a-z]{2} [0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} [A-Z]{3} [0-9]{4}'
+date_regex = r'[A-Z][a-z]{2} [A-Z][a-z]{2} [0-9, ]* [0-9]{2}:[0-9]{2}:[0-9]{2} [A-Z]{3} [0-9]{4}'
 matches = re.findall(date_regex, logging)
 if not matches:
     exit(1)
