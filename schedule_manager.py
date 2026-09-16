@@ -5,6 +5,7 @@ import sys
 import subprocess as sp
 import library as lb
 import settings
+import datetime
 
 def parse(source):
 	path = settings.EVENTS_PATHS[source]
@@ -128,8 +129,8 @@ def convert_to_event_format(name, time_slot, link, description):
 	return '\n\t- '.join(information) + '\n\n'
 
 
-def print_meetings(silence_empty=False, to_str=False):
-	now = lb.get_current_datetime()
+def print_meetings(days=0, silence_empty=False, to_str=False):
+	now = lb.get_current_datetime() + datetime.timedelta(days=int(days))
 	day_name = now.strftime('%A')
 
 	events = get_events()
