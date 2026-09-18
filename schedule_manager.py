@@ -173,8 +173,8 @@ def main():
 	if not events:
 		exit(0)
 
-	closest = min(events, key=lambda x: (current_datetime - x['time_slot'][0]).total_seconds())
-	distance = (current_datetime - closest['time_slot'][0]).total_seconds()
+	closest = min(events, key=lambda x: (x['time_slot'][0] - current_datetime).total_seconds())
+	distance = (closest['time_slot'][0] - current_datetime).total_seconds() / 60
 	if distance < 5:
 		update_url_file(closest, settings.OUTFILE)
 		if distance >= 0:
